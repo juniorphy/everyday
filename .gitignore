@@ -9,6 +9,7 @@ __pycache__/
 */*.asc
 
 # Distribution / packaging
+*/.idea/
 .Python
 env/
 build/
