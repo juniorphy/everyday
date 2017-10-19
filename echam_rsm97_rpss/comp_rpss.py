@@ -8,11 +8,12 @@ np.set_printoptions(precision=3)
 
 pathmod = '/home/junior/ownCloud/data/flow_season_forecast_models_pet-ok_new/'
 
-basins = ['coremas_maedagua', 'armando_ribeiro', 'oros', 'castanhao', 'banabuiu']
+basins = ['armando_ribeiro','banabuiu', 'castanhao', 'coremas_maedagua',  'oros']
 
 basins = sorted(basins)
+t=1
+ff = sorted(glob('obs/*.asc'))
 
-ff = glob('obs/*.asc')
 
 rpss_prev = np.full((6,5),np.nan)
 rpss_clim = np.full((6,5),np.nan)
@@ -22,15 +23,22 @@ prob_acu_prev = np.full((6,6,3), np.nan)
 prob_acu_obs  = np.full((6,6,3), np.nan)
 prob_acu_clim = np.full((6,6,3), np.nan)
 
+rps_fcst = []
+
+rps_clim = []
 
 for ii,f in enumerate(ff):
     #model
-    fgen = glob(pathmod+'jan_fma_2011-2017/{0}/qvaz*{0}*_ECHAM4.6*pr.txt'.format(basins[ii]))
+    fgen = glob(pathmod+'jan_fma_2011-2017/{0}/qvaz*{0}*_ECHAM4.6*7_corr-flow.txt'.format(basins[ii]))
     vaz_mod = np.loadtxt(fgen[0], skiprows=1, usecols=range(2,22))
     vaz_mod = vaz_mod[0:-1,:]
     vazfma_mod = np.mean(vaz_mod[1:4,:], axis=0)
     #obs
     vaz_obs = np.loadtxt(f)
+    print
+    print
+    print basins[ii]
+
     vaz_obs = np.reshape(vaz_obs, [40,12])
     vaz8110_obs = vaz_obs[4:34, :]
     fma8110_obs = np.mean(vaz8110_obs[:, 1:4], axis=1) # climatology period 1981-2010
@@ -58,17 +66,31 @@ for ii,f in enumerate(ff):
         prob_acu_obs[ii, y, :] = np.array([a, b, c])
         prob_acu_clim[ii, y, :] = np.array([1./3., 2./3., 1.])
 
-    print (prob_acu_prev[ii, ...]- prob_acu_obs[ii, ...]).shape
+    rps_fcst.append((np.sum((prob_acu_prev[ii, ...] - prob_acu_obs[ii, ...])**2, axis=1))/2) # dividing by 2
 
-    rpss_prev = np.sum(np.sum(prob_acu_prev[ii, ...] - prob_acu_obs[ii, ...], axis=1)**2, axis=0)/6
+    # categories and dividing by 6 years of analysing
 
-    rpss_clim = np.sum(np.sum(prob_acu_clim[ii, ...] - prob_acu_obs[ii, ...], axis=1)**2, axis=0)/6
+    rps_clim.append((np.sum((prob_acu_clim[ii, ...] - prob_acu_obs[ii, ...])**2, axis=1))/2)
 
-    RPSS = 1 - rpss_prev / rpss_clim
+    t += 1
+    print t
 
-    print RPSS
+    print 1 - np.mean(rps_fcst[:]) / np.mean(rps_clim[:])
+
+rps_fcst
+
+#flattened_list = [y for x in rps_fcst for y in x]
+
+#print np.mean(flattened_list)
+
+exit()
+
+print np.mean(rps_fcst), np.mean(rps_clim)
+
+RPSS = 1 - np.mean(rps_fcst) / np.mean(rps_clim)
+
 
     #fma8110 = vaz811
-    exit()
+
 
 #vaz_mod = np.loadtxt('FMA/basin/')
