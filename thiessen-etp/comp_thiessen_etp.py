@@ -19,3 +19,5 @@ thi = Thiessen.thiessen(raw,lat,lon,shape,pf=3, num_proc=8)
 
 write_thiessen(thi, '19610101', '20161231', 'daily', 'pet', 'inmet', 'obs','litoral', '')
 
+
+
