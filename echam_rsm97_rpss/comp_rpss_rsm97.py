@@ -2,13 +2,20 @@ import numpy as np
 from glob import glob
 from scipy import stats as st
 from matplotlib import pyplot as plt
+from sys import argv
 #from PyFuncemeClimateTools.ClimateStats import compute_rpss
 
 np.set_printoptions(precision=3)
 
-seas = 'fma'
-beg=1
-edn=4
+seas = argv[1]
+sett = { 'fmam' : [1, 5] , 'fma' : [1,4] , 'mam' : [2,5]}
+
+beg=sett[seas][0]
+edn=sett[seas][1]
+
+#seas = 'fmam'
+#beg=1
+#edn=5
 
 pathmod = '/home/junior/ownCloud/data/rsm_flow_season_forecast_2011_2017/'
 
@@ -16,19 +23,18 @@ basins = ['armando_ribeiro','banabuiu', 'castanhao', 'coremas_maedagua',  'oros'
 
 basins = sorted(basins)
 t=1
-ff = sorted(glob('obs/*.asc'))
+ff = sorted(glob('obs/flow*1981*20170531.asc'))
 
-
-rpss_prev = np.full((30),np.nan)
-rpss_clim = np.full((30),np.nan)
+#rpss_prev = np.full((35),np.nan)
+#rpss_clim = np.full((35),np.nan)
 
 prob_bas_prev = np.full((5,7,3), np.nan)
 prob_bas_obs  = np.full((5,7,3), np.nan)
 prob_bas_clim = np.full((5,7,3), np.nan)
 
-prob_acu_prev = np.full((30,3), np.nan)
-prob_acu_obs  = np.full((30,3), np.nan)
-prob_acu_clim = np.full((30,3), np.nan)
+prob_acu_prev = np.full((35,3), np.nan)
+prob_acu_obs  = np.full((35,3), np.nan)
+prob_acu_clim = np.full((35,3), np.nan)
 d = 0 
 rps_fcst = []
 rps_f = []
@@ -40,23 +46,26 @@ for ii,f in enumerate(ff):
     #fname = pathmod+'asc/JAN_{1}/*'.format(basins[ii],seas.upper())
     #print fname
     fgen = glob(pathmod+'asc/JAN_{1}/qvaz*{0}*RSM97*{1}*7.asc'.format(basins[ii],seas.upper()))
-    print fgen
-    exit()
+#    print fgen
+    
     vaz_mod = np.loadtxt(fgen[0])
     vaz_mod = np.transpose(vaz_mod)
-    print vaz_mod.shape
-    raw_input()
-    vaz_mod = vaz_mod[0:-1,:]
-    vazfma_mod = np.mean(vaz_mod[beg:edn,:], axis=0)
-    #obs
-    vaz_obs = np.loadtxt(f)
-    print
     
+    #raw_input()
+    #vaz_mod = vaz_mod[0:-1,:]
+    
+    ###    obs   ####
+    vaz_obs = np.loadtxt(f)
+    #print fgen
+    #print f
+    
+    vaz_obs = np.reshape(vaz_obs, [37,12])
 
-    vaz_obs = np.reshape(vaz_obs, [40,12])
-    vaz8110_obs = vaz_obs[4:34, :]
+    vaz8110_obs = vaz_obs[0:30, :]
     fma8110_obs = np.mean(vaz8110_obs[:, beg:edn], axis=1) # climatology period 1981-2010
-    vazfma_obs  = np.mean(vaz_obs[34:,beg:edn], axis=1)    # forecast period 2011-2016
+    vazfma_obs  = np.mean(vaz_obs[30:,beg:edn], axis=1)    # forecast period 2011-2016
+    
+    #raw_input()
 
     mean = np.mean(fma8110_obs)
     std = np.std(fma8110_obs)
@@ -117,6 +126,7 @@ print
 print 'RPSS all basins'
 print 1 - np.mean(rps_fcst[:]) / np.mean(rps_clim[:])
 
+
 #print 1 - np.mean(rps_fcst[:]) / np.mean(rps_clim[:])
 
 #print rps_fcst
@@ -124,4 +134,3 @@ print 1 - np.mean(rps_fcst[:]) / np.mean(rps_clim[:])
 #flattened_list = [y for x in rps_fcst for y in x]
 
 #print np.mean(flattened_list)
-exit()
