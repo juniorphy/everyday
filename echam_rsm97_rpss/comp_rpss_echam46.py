@@ -2,33 +2,36 @@ import numpy as np
 from glob import glob
 from scipy import stats as st
 from matplotlib import pyplot as plt
+from sys import argv
 #from PyFuncemeClimateTools.ClimateStats import compute_rpss
 
 np.set_printoptions(precision=3)
 
-seas = 'fmam'
-beg=1
-edn=5
+seas = argv[1]
+sett = { 'fmam' : [1, 5] , 'fma' : [1,4] , 'mam' : [2,5]}
 
-pathmod = '/home/junior/ownCloud/data/flow_season_forecast_models_pet-ok_new/'
+beg=sett[seas][0]
+edn=sett[seas][1]
+
+pathmod = '/home/junior/ownCloud/data/echam_flow_season_forecast_models_pet-ok_new/'
 
 basins = ['armando_ribeiro','banabuiu', 'castanhao', 'coremas_maedagua',  'oros']
 
 basins = sorted(basins)
 t=1
-ff = sorted(glob('obs/*.asc'))
+ff = sorted(glob('obs/flow*1981*20170531.asc'))
 
 
-rpss_prev = np.full((30),np.nan)
-rpss_clim = np.full((30),np.nan)
+#rpss_prev = np.full((30),np.nan)
+#rpss_clim = np.full((30),np.nan)
 
-prob_bas_prev = np.full((5,6,3), np.nan)
-prob_bas_obs  = np.full((5,6,3), np.nan)
-prob_bas_clim = np.full((5,6,3), np.nan)
+prob_bas_prev = np.full((5,7,3), np.nan)
+prob_bas_obs  = np.full((5,7,3), np.nan)
+prob_bas_clim = np.full((5,7,3), np.nan)
 
-prob_acu_prev = np.full((30,3), np.nan)
-prob_acu_obs  = np.full((30,3), np.nan)
-prob_acu_clim = np.full((30,3), np.nan)
+prob_acu_prev = np.full((35,3), np.nan)
+prob_acu_obs  = np.full((35,3), np.nan)
+prob_acu_clim = np.full((35,3), np.nan)
 d = 0 
 rps_fcst = []
 rps_f = []
@@ -38,18 +41,21 @@ rps_c = []
 for ii,f in enumerate(ff):
     #model
     fgen = glob(pathmod+'jan_{1}_2011-2017/{0}/qvaz*{0}*_ECHAM4.6*7.txt'.format(basins[ii],seas))
+#    print 'begin'
+#   print fgen
+
     vaz_mod = np.loadtxt(fgen[0], skiprows=1, usecols=range(2,22))
-    vaz_mod = vaz_mod[0:-1,:]
-    vazfma_mod = np.mean(vaz_mod[beg:edn,:], axis=0)
+    #vaz_mod = vaz_mod[0:-1,:]
+    #vazfma_mod = vaz_mod
     #obs
     vaz_obs = np.loadtxt(f)
     print
     
 
-    vaz_obs = np.reshape(vaz_obs, [40,12])
-    vaz8110_obs = vaz_obs[4:34, :]
+    vaz_obs = np.reshape(vaz_obs, [37,12])
+    vaz8110_obs = vaz_obs[0:30, :]
     fma8110_obs = np.mean(vaz8110_obs[:, beg:edn], axis=1) # climatology period 1981-2010
-    vazfma_obs  = np.mean(vaz_obs[34:,beg:edn], axis=1)    # forecast period 2011-2016
+    vazfma_obs  = np.mean(vaz_obs[30:,beg:edn], axis=1)    # forecast period 2011-2016
 
     mean = np.mean(fma8110_obs)
     std = np.std(fma8110_obs)
@@ -59,7 +65,7 @@ for ii,f in enumerate(ff):
     p33 = y_obs.ppf(q=1./3.)
     p66 = y_obs.ppf(q=2./3.)
 
-    for y in range(6):
+    for y in range(7):
         #print 'ano =', y+1
         a = float(np.sum(vaz_mod[y,:] < p33)) / 20
         b = float(np.sum(vaz_mod[y,:] < p66)) / 20
