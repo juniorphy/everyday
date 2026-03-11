@@ -17,7 +17,7 @@ def download_image(url, filename):
         print(f"Erro ao baixar {url}: {e}")
         return False
 
-def create_image_subplot(start_year, end_year, images_per_row, output_filename, main_title="", logo_path=None):
+def create_image_subplot(start_year, end_year, mes, images_per_row, output_filename, main_title="", logo_path=None):
     """
     Cria uma imagem de subplot combinando imagens de um intervalo de anos.
 
@@ -28,7 +28,7 @@ def create_image_subplot(start_year, end_year, images_per_row, output_filename, 
         output_filename (str): Nome do arquivo da imagem de saída.
         main_title (str): Título principal para a imagem combinada.
     """
-    base_url = "http://www5.funceme.br/web/storage/obs/interpolation_kriging_funceme_valid_rain/{}/12-1/category-pr-dez-jan-{}.png"
+    #base_url = "http://www5.funceme.br/web/storage/obs/interpolation_kriging_funceme_valid_rain/{}/12-1/category-pr-{}-{}.png"
 
     image_paths = []
     temp_dir = "temp_funceme_images"
@@ -36,9 +36,10 @@ def create_image_subplot(start_year, end_year, images_per_row, output_filename, 
 
     print(f"Baixando imagens de {start_year} a {end_year}...")
     for year in range(start_year, end_year + 1):
-        url = base_url.format(year, year)
+        #url = base_url.format(year, mes, year)
+        url = f"http://www5.funceme.br/web/storage/obs/interpolation_kriging_funceme_valid_rain/{year}/2/category-pr-{mes}-{year}.png"
         #filename = os.path.join(temp_dir, f"category-pr-fev-mai-{year}.png")
-        filename = os.path.join(temp_dir, f"category-pr-dez-jan-{year}.png")
+        filename = os.path.join(temp_dir, f"category-pr-{mes}-{year}.png")
         if download_image(url, filename):
             image_paths.append(filename)
 
@@ -59,7 +60,7 @@ def create_image_subplot(start_year, end_year, images_per_row, output_filename, 
     for i, img_path in enumerate(image_paths):
         img = mpimg.imread(img_path)
         axes[i].imshow(img)
-        axes[i].set_title(os.path.basename(img_path).replace('category-pr-dez-jan-', '').replace('.png', ''), fontsize=14)
+        axes[i].set_title(os.path.basename(img_path).replace(f'category-pr-{mes}-', '').replace('.png', ''), fontsize=14)
         axes[i].axis('off') 
 #    axes.annotate(0.9,0.1,'Climatolgioia')
     # Oculta subplots vazios, se houver
@@ -101,8 +102,9 @@ if __name__ == "__main__":
     end_year = 2026
     images_per_row = 10
     logo_file='logo_funceme.png'
+    mes = 'fev'
     #main_title = "Histórico de categoria de precipitação Fev a Maio de 1974 a 2025"
-    main_title = "Histórico de categoria de precipitação Dez-Jan de 1974 a 2026*"
-    output_filename = "subplot_funceme_chuva_dez-jan_1974_2026.png"
-    create_image_subplot(start_year, end_year, images_per_row, output_filename,
-                         main_title=main_title, logo_path=logo_file)
+    main_title = "Histórico de categoria de precipitação Fev de 1974 a 2026*"
+    output_filename = f"subplot_funceme_chuva_{mes}_1974_2026.png"
+    create_image_subplot(start_year, end_year, mes,  images_per_row, output_filename,
+                         main_title=main_title, logo_path=logo_file )
